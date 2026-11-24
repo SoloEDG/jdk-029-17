@@ -2,11 +2,12 @@
 import { Activity } from '@lucide/vue'
 import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import type { GuideNote, PitchPoint, TimeRange } from '../../../shared/document'
-import { drawPitch } from '../lib/plot'
+import { drawPitch, type PlotMarker } from '../lib/plot'
 
 const props = defineProps<{
   notes: GuideNote[]; position: number; range: TimeRange; latest: string | null
   live: PitchPoint[]; takeA: PitchPoint[]; takeB: PitchPoint[]
+  focus: PitchPoint[]; markers: PlotMarker[]
 }>()
 const canvas = ref<HTMLCanvasElement | null>(null)
 const size = ref({ width: 0, height: 0 })
@@ -28,7 +29,9 @@ watchEffect(() => {
       { points: props.takeA, color: '#85cbd5' },
       { points: props.takeB, color: '#ec9fa9' },
       { points: props.live, color: '#b8dc9d' },
+      { points: props.focus, color: '#f1ecdb' },
     ],
+    markers: props.markers,
   })
 })
 </script>
@@ -40,10 +43,15 @@ watchEffect(() => {
       <div class="pitch-legends">
         <span><i class="legend reference"></i>参考音</span><span><i class="legend live"></i>我的声音</span>
         <span v-if="takeA.length"><i class="legend a"></i>A</span><span v-if="takeB.length"><i class="legend b"></i>B</span>
+        <span v-if="focus.length"><i class="legend focus"></i>诊断录音</span>
       </div>
     </div>
     <canvas ref="canvas" class="pitch-canvas" role="img"
       :aria-label="`参考音与录音音高轨迹，当前音高 ${latest ?? '未检测到'}`"></canvas>
-    <div class="pitch-footer"><span>当前音高 <strong class="mono">{{ latest ?? '—' }}</strong></span><span>歌曲时间</span></div>
+    <div class="pitch-footer">
+      <span>当前音高 <strong class="mono">{{ latest ?? '—' }}</strong></span>
+      <span v-if="markers.length" class="marker-legend">▼起音 ●达标 ✕移位</span>
+      <span>歌曲时间</span>
+    </div>
   </section>
 </template>

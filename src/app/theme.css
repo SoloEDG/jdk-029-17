@@ -192,6 +192,38 @@ input[type=range]::-moz-range-thumb { border: none; background: var(--gold); wid
 .slot-a { color: #85cbd5; }
 .slot-b { color: #ec9fa9; }
 
+.diag-toggle { width: 30px; }
+.diag-toggle.on { color: var(--gold); }
+.diagnosis { margin-top: 14px; display: grid; gap: 8px; }
+.diagnosis > p { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+.diagnosis > p svg { color: var(--gold); }
+.diagnosis ol { display: grid; gap: 6px; }
+.diagnosis li {
+  border: 1px solid var(--rule); border-radius: 5px; padding: 7px 8px;
+  display: grid; gap: 6px; align-content: start;
+}
+.diag-row { display: flex; align-items: baseline; gap: 7px; }
+.diag-row strong { font-size: 12px; }
+.diag-time { color: var(--muted); font-size: 10px; }
+.diag-chip { margin-left: auto; font-size: 10px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+.diag-ok .diag-chip { color: var(--green); background: #2a3324; }
+.diag-issues .diag-chip { color: var(--coral); background: #38271f; }
+.diag-off-target .diag-chip { color: var(--coral); background: #38271f; }
+.diag-unreliable .diag-chip, .diag-incomplete .diag-chip,
+.diag-missed .diag-chip, .diag-unrecorded .diag-chip { color: var(--muted); background: #2a2d24; }
+.diag-tag { font-size: 9px; color: var(--muted); border: 1px solid var(--rule); border-radius: 3px; padding: 1px 4px; }
+.diag-hint { color: var(--muted); font-size: 10px; }
+.diag-moments { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.diag-moments button {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 26px;
+  border: 1px solid var(--rule); background: var(--inset); border-radius: 4px;
+  padding: 2px 6px; font-size: 10px; font-family: var(--mono);
+}
+.diag-moments button:hover { border-color: var(--gold); color: var(--gold); }
+.diag-moments small { color: var(--muted); font-size: 9px; }
+.legend.focus { background: #f1ecdb; }
+.marker-legend { color: var(--muted); font-size: 10px; }
+
 @media (min-width: 1600px) {
   .workspace { grid-template-columns: 235px minmax(0, 1fr) 245px; }
   .pitch-canvas { height: 245px; }

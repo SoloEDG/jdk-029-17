@@ -2,7 +2,7 @@ import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { songs, useTransport } from '../features/playback'
 import { useLyrics } from '../features/lyrics'
 import { useCapture } from '../features/capture'
-import { usePitch } from '../features/pitch'
+import { usePitch, type PlotMarker } from '../features/pitch'
 import { useReview } from '../features/review'
 import type { Song, Take } from '../shared/document'
 
@@ -32,6 +32,18 @@ export function useWorkspace() {
     return lyrics.active.value ?? lyrics.upcoming.value ?? lyrics.selected.value!
   })
   const graphPosition = computed(() => review.position.value ?? transport.position.value)
+  const markers = computed<PlotMarker[]>(() => review.diagnosis.value.flatMap(item => {
+    const list: PlotMarker[] = []
+    if (item.onset != null) {
+      list.push({ time: item.onset, midi: item.note.midi, kind: 'onset', tone: item.issues.includes('late-onset') ? 'issue' : 'ok' })
+    }
+    if (item.reach != null) {
+      list.push({ time: item.reach, midi: item.note.midi, kind: 'reach', tone: item.issues.includes('slow-slide') ? 'issue' : 'ok' })
+    }
+    if (item.drift != null) list.push({ time: item.drift, midi: item.note.midi, kind: 'drift', tone: 'issue' })
+    if (item.status === 'unreliable') list.push({ time: item.note.start, midi: item.note.midi, kind: 'unknown', tone: 'muted' })
+    return list
+  }))
 
   function finishCapture(position: number): void { void capture.stop(position) }
 
@@ -105,6 +117,8 @@ export function useWorkspace() {
 
   function listen(take: Take) { void review.listen(take) }
 
+  function listenFrom(take: Take, time: number) { void review.listenFrom(take, time) }
+
   watch(transport.position, position => {
     const line = lyrics.selected.value
     if (line && position >= line.end) finishCapture(line.end)
@@ -119,7 +133,7 @@ export function useWorkspace() {
   onBeforeUnmount(() => document.removeEventListener('visibilitychange', handleVisibility))
 
   return {
-    transport, lyrics, pitch, review, capture, graphRange, graphPosition,
-    selectLine, adjacent, selectSong, seek, toggleLoop, togglePlay, toggleRecording, listen,
+    transport, lyrics, pitch, review, capture, graphRange, graphPosition, markers,
+    selectLine, adjacent, selectSong, seek, toggleLoop, togglePlay, toggleRecording, listen, listenFrom,
   }
 }

@@ -8,8 +8,8 @@ import { ReviewPanel } from '../features/review'
 import { useWorkspace } from './useWorkspace'
 
 const {
-  transport, lyrics, pitch, review, capture, graphRange, graphPosition,
-  selectLine, adjacent, selectSong, seek, toggleLoop, togglePlay, toggleRecording, listen,
+  transport, lyrics, pitch, review, capture, graphRange, graphPosition, markers,
+  selectLine, adjacent, selectSong, seek, toggleLoop, togglePlay, toggleRecording, listen, listenFrom,
 } = useWorkspace()
 </script>
 
@@ -32,7 +32,8 @@ const {
       <PitchPanel :notes="transport.song.value.notes" :position="graphPosition" :range="graphRange"
         :latest="capture.status.value === 'recording' ? pitch.latest.value : null"
         :live="capture.status.value === 'recording' ? pitch.points.value : []"
-        :take-a="review.slots.value[0]?.pitch ?? []" :take-b="review.slots.value[1]?.pitch ?? []" />
+        :take-a="review.slots.value[0]?.pitch ?? []" :take-b="review.slots.value[1]?.pitch ?? []"
+        :focus="review.diagnosed.value?.pitch ?? []" :markers="markers" />
       <TransportBar :song="transport.song.value" :position="transport.position.value" :playing="transport.isPlaying.value"
         :loop="transport.loop.value" :volume="transport.volume.value" :issue="transport.issue.value"
         @toggle="togglePlay" @previous="adjacent(-1)" @next="adjacent(1)" @loop="toggleLoop"
@@ -43,7 +44,8 @@ const {
     <aside class="right-rail">
       <ReviewPanel :takes="review.visible.value" :slots="review.slots.value" :active-id="review.playingId.value"
         :selected="lyrics.selected.value" :notes="transport.song.value.notes" :issue="review.issue.value"
-        @listen="listen" @choose="review.choose" />
+        :diagnosis="review.diagnosis.value" :diagnosed-id="review.diagnosedId.value"
+        @listen="listen" @choose="review.choose" @diagnose="review.diagnose" @listen-from="listenFrom" />
     </aside>
   </main>
 </template>

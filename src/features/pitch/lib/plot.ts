@@ -4,11 +4,19 @@ import { noteName } from './detect'
 
 interface Trace { points: PitchPoint[]; color: string }
 
+export interface PlotMarker {
+  time: number
+  midi: number
+  kind: 'onset' | 'reach' | 'drift' | 'unknown'
+  tone: 'ok' | 'issue' | 'muted'
+}
+
 interface Plot {
   position: number
   range: TimeRange
   notes: GuideNote[]
   traces: Trace[]
+  markers: PlotMarker[]
 }
 
 export function drawPitch(canvas: HTMLCanvasElement, width: number, height: number, plot: Plot) {
@@ -83,6 +91,39 @@ export function drawPitch(canvas: HTMLCanvasElement, width: number, height: numb
       last = point
     }
     context.stroke()
+  }
+  const tones: Record<PlotMarker['tone'], string> = { ok: '#b8dc9d', issue: '#f09982', muted: '#989b89' }
+  for (const marker of plot.markers) {
+    if (marker.time < first || marker.time > plot.range.end) continue
+    const mx = x(marker.time)
+    const my = y(marker.midi)
+    const color = tones[marker.tone]
+    context.fillStyle = color
+    context.strokeStyle = color
+    if (marker.kind === 'onset') {
+      context.beginPath()
+      context.moveTo(mx - 4, my - 13)
+      context.lineTo(mx + 4, my - 13)
+      context.lineTo(mx, my - 6)
+      context.closePath()
+      context.fill()
+    } else if (marker.kind === 'reach') {
+      context.beginPath()
+      context.arc(mx, my, 3, 0, Math.PI * 2)
+      context.fill()
+    } else if (marker.kind === 'drift') {
+      context.lineWidth = 1.6
+      context.beginPath()
+      context.moveTo(mx - 3.5, my - 3.5)
+      context.lineTo(mx + 3.5, my + 3.5)
+      context.moveTo(mx + 3.5, my - 3.5)
+      context.lineTo(mx - 3.5, my + 3.5)
+      context.stroke()
+    } else {
+      context.font = '10px "IBM Plex Mono", monospace'
+      context.textAlign = 'center'
+      context.fillText('?', mx, my - 9)
+    }
   }
   if (plot.position >= first && plot.position <= plot.range.end) {
     context.strokeStyle = '#f6eddb'
